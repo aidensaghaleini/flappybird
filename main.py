@@ -12,6 +12,7 @@ PIPE_SPACING = 135
 # game variables
 player_y = 100
 player_y_speed = 0
+player_alive = True
 
 # pygame setup
 pygame.init()
@@ -45,12 +46,11 @@ class Pipe:
 pipe_list = [Pipe(SCREEN_WIDTH)]
 
 while running:
-    # poll for events
     # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and player_alive == True:
             player_y_speed = -5
 
     # fill the screen with a color to wipe away anything from last frame
@@ -68,9 +68,11 @@ while running:
 
     if player_y > SCREEN_HEIGHT - PLAYER_SIZE:
         player_y = SCREEN_HEIGHT - PLAYER_SIZE
+        player_alive = False
     if player_y < PLAYER_SIZE:
         player_y = PLAYER_SIZE
         player_y_speed = 0
+        player_alive = False
 
     # moving the pipe
     for i in range(len(pipe_list) - 1, -1, -1):
