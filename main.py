@@ -5,7 +5,7 @@ import random
 # setup variables
 SCREEN_WIDTH = 400
 SCREEN_HEIGHT = 600
-PLAYER_SIZE = 25
+PLAYER_SIZE = 50
 PIPE_WIDTH = 70
 PIPE_SPACING = 135
 
@@ -43,6 +43,30 @@ class Pipe:
             SCREEN_HEIGHT - (self.y + PIPE_SPACING / 2)
         ))
 
+    def kill_bird(self):
+        global player_alive, player_y_speed
+
+        # top pipe
+        if (
+            100 - PLAYER_SIZE / 2 > self.x - 1/2 * PIPE_WIDTH - PLAYER_SIZE and
+            100 - PLAYER_SIZE / 2 < self.x + 1/2 * PIPE_WIDTH and
+            player_y - PLAYER_SIZE / 2 < self.y - PIPE_SPACING / 2 and
+            player_y - PLAYER_SIZE / 2 > -PLAYER_SIZE
+        ):
+            if player_alive == True:
+                player_y_speed = 0
+            player_alive = False
+
+        # bottom pipe
+        if (
+            100 - PLAYER_SIZE / 2 > self.x - 1/2 * PIPE_WIDTH - PLAYER_SIZE and
+            100 - PLAYER_SIZE / 2 < self.x + 1/2 * PIPE_WIDTH and
+            player_y - PLAYER_SIZE / 2 > self.y + (PIPE_SPACING/2) - PLAYER_SIZE
+        ):
+            if player_alive == True:
+                player_y_speed = 0
+            player_alive = False
+
 pipe_list = [Pipe(SCREEN_WIDTH)]
 
 while running:
@@ -51,7 +75,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and player_alive == True:
-            player_y_speed = -5
+            player_y_speed = -3.8
 
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("#a4d3fd")
@@ -59,28 +83,30 @@ while running:
     # RENDER YOUR GAME HERE
     for i in range(len(pipe_list)):
         pipe_list[i].draw()
+        pipe_list[i].kill_bird()
 
-    pygame.draw.circle(screen, "yellow", (100, player_y), PLAYER_SIZE)
+    pygame.draw.circle(screen, "yellow", (100, player_y), PLAYER_SIZE / 2)
 
     # moving the bird
     player_y += player_y_speed
     player_y_speed += 0.2
 
-    if player_y > SCREEN_HEIGHT - PLAYER_SIZE:
-        player_y = SCREEN_HEIGHT - PLAYER_SIZE
+    if player_y > SCREEN_HEIGHT - PLAYER_SIZE / 2:
+        player_y = SCREEN_HEIGHT - PLAYER_SIZE / 2
         player_alive = False
-    if player_y < PLAYER_SIZE:
-        player_y = PLAYER_SIZE
+    if player_y < PLAYER_SIZE / 2:
+        player_y = PLAYER_SIZE / 2
         player_y_speed = 0
         player_alive = False
 
     # moving the pipe
-    for i in range(len(pipe_list) - 1, -1, -1):
-        pipe_list[i].x -= 2
-        if pipe_list[i].x == 100:
-            pipe_list.append(Pipe(SCREEN_WIDTH))
-        if pipe_list[i].x == -100:
-            pipe_list.remove(pipe_list[i])
+    if player_alive == True:
+        for i in range(len(pipe_list) - 1, -1, -1):
+            pipe_list[i].x -= 2
+            if pipe_list[i].x == 100:
+                pipe_list.append(Pipe(SCREEN_WIDTH))
+            if pipe_list[i].x == -100:
+                pipe_list.remove(pipe_list[i])
 
     # flip() the display to put your work on screen
     pygame.display.flip()
